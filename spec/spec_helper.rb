@@ -1,4 +1,4 @@
-# Put in this file for simplicity
+# The module is included in this file for simplicity
 module ControllerMacros
     def puts_proof_of_extensions_by_proc
         before do
@@ -16,13 +16,19 @@ end
 RSpec.configure do |config|
 
     # Extend an example group with a helper module iff the group describes a controller
-    action_controller_filter = {
+    action_controller_extension_filter = {
+      described_class: -> described { described < ActionController::Base }
+    }
+
+    config.extend ControllerMacros, action_controller_extension_filter
+
+    # Only call helper module's methods if metadata flag is also present
+    action_controller_activation_filter = {
       described_class: -> described { described < ActionController::Base },
       prove_it: "proc"
     }
 
-    config.extend ControllerMacros, action_controller_filter
-    config.before(:all, action_controller_filter) do
+    config.before(:all, action_controller_activation_filter) do
         self.class.puts_proof_of_extensions_by_proc
         self.class.prove_by_letting_value
     end
